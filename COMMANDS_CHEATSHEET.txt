@@ -1,0 +1,276 @@
+================================================================================
+                    COMMAND CHEATSHEET - QUICK REFERENCE
+           Plasmodium Detector - All Commands in One Place
+================================================================================
+
+📍 IMPORTANT: Always run these from your project folder!
+   cd "C:\Users\kazzi\Desktop\AI Model-Plasmodium Detector-Mehrad"
+
+
+================================================================================
+1. FIRST TIME SETUP (Do Once)
+================================================================================
+
+# Create virtual environment
+python -m venv .venv
+
+# Activate virtual environment (do this EVERY TIME you open new terminal)
+.\.venv\Scripts\activate
+
+# Install all required packages (takes 10-20 min)
+pip install -r requirements.txt
+
+
+================================================================================
+2. CONVERT YOUR DATA (Do Once)
+================================================================================
+
+# Convert CSV to YOLO format
+python convert_csv_to_yolo.py
+
+# Check if everything is ready
+python check_setup.py
+
+
+================================================================================
+3. TRAINING COMMANDS
+================================================================================
+
+# Basic training (CPU, 50 epochs) - SLOW but works
+python src/train.py --data config/data.yaml --model yolov8n.pt --epochs 50 --batch 8 --imgsz 640 --device cpu --project runs --name exp1 --seed 42
+
+# Training with GPU (if you have NVIDIA GPU) - FAST
+python src/train.py --data config/data.yaml --model yolov8n.pt --epochs 50 --batch 8 --imgsz 640 --device cuda:0 --project runs --name exp1 --seed 42
+
+# Longer training (better results)
+python src/train.py --data config/data.yaml --model yolov8n.pt --epochs 100 --batch 8 --imgsz 640 --device cpu --project runs --name exp2 --seed 42
+
+# Bigger model (more accurate but slower)
+python src/train.py --data config/data.yaml --model yolov8s.pt --epochs 50 --batch 8 --imgsz 640 --device cpu --project runs --name exp3 --seed 42
+
+# If you get "out of memory" error, use smaller batch:
+python src/train.py --data config/data.yaml --model yolov8n.pt --epochs 50 --batch 4 --imgsz 640 --device cpu --project runs --name exp4 --seed 42
+
+
+================================================================================
+4. EVALUATION COMMANDS
+================================================================================
+
+# Evaluate your model (replace exp1 with your experiment name)
+python src/eval.py --weights runs/exp1/weights/best.pt --data config/data.yaml --device cpu --save-json results/metrics.json --save-csv results/metrics.csv
+
+# With GPU
+python src/eval.py --weights runs/exp1/weights/best.pt --data config/data.yaml --device cuda:0 --save-json results/metrics.json --save-csv results/metrics.csv
+
+
+================================================================================
+5. INFERENCE COMMANDS (Testing Your Model)
+================================================================================
+
+# Test on ONE image
+python src/infer.py --weights runs/exp1/weights/best.pt --source "path/to/your/image.jpg" --device cpu --save-vis results/output
+
+# Test on FOLDER of images
+python src/infer.py --weights runs/exp1/weights/best.pt --source "path/to/your/folder" --device cpu --save-vis results/output
+
+# Test on your original dataset images
+python src/infer.py --weights runs/exp1/weights/best.pt --source "MP-IDB-The-Malaria-Parasite-Image-Database-for-Image-Processing-and-Analysis-master/Falciparum/img" --device cpu --save-vis results/falciparum_test
+
+# Use webcam (live detection)
+python src/infer.py --weights runs/exp1/weights/best.pt --webcam 0 --device cpu
+
+
+================================================================================
+6. GUI COMMAND (Easy Interface)
+================================================================================
+
+# Open graphical interface
+python src/gui.py --weights runs/exp1/weights/best.pt --device cpu --data config/data.yaml
+
+# With GPU
+python src/gui.py --weights runs/exp1/weights/best.pt --device cuda:0 --data config/data.yaml
+
+
+================================================================================
+7. EXPORT COMMANDS (Deploy Your Model)
+================================================================================
+
+# Export to ONNX (for deployment)
+python src/export.py --weights runs/exp1/weights/best.pt --formats onnx --output exports/
+
+# Export to multiple formats
+python src/export.py --weights runs/exp1/weights/best.pt --formats onnx torchscript --output exports/
+
+
+================================================================================
+8. UTILITY COMMANDS
+================================================================================
+
+# Check Python version
+python --version
+
+# Check if setup is correct
+python check_setup.py
+
+# List what's in a folder
+dir Dataset\images\train
+
+# Count files in folder
+dir Dataset\images\train /b | find /c /v ""
+
+# View first few lines of a file
+type Dataset\labels\train\1305121398-0001-R_S.txt
+
+
+================================================================================
+9. MONITORING TRAINING
+================================================================================
+
+# View training results with TensorBoard (run in separate terminal)
+tensorboard --logdir runs/exp1
+
+# Then open browser to: http://localhost:6006
+
+
+================================================================================
+10. PARAMETER EXPLANATIONS
+================================================================================
+
+--data          Path to data.yaml config file
+--model         Model size: yolov8n/s/m/l/x (.pt file)
+                n=nano (fastest), s=small, m=medium, l=large, x=extra large
+--epochs        How many times to go through dataset (50-200 typical)
+--batch         Images per batch (8 typical, lower if out of memory)
+--imgsz         Image size in pixels (640 standard, 1280 for small objects)
+--device        cpu or cuda:0 (GPU)
+--project       Where to save results (default: runs)
+--name          Name for this experiment
+--seed          Random seed for reproducibility (42 is common)
+--weights       Path to trained model weights (.pt file)
+--source        Image file or folder for inference
+--save-vis      Where to save visualization results
+--webcam        Webcam index (usually 0 for default camera)
+--formats       Export formats: onnx, torchscript, etc.
+--output        Output folder for exports
+
+
+================================================================================
+11. FILE PATHS QUICK REFERENCE
+================================================================================
+
+Your trained model:
+  runs/<experiment_name>/weights/best.pt
+
+Training graphs:
+  runs/<experiment_name>/results.png
+
+Confusion matrix:
+  runs/<experiment_name>/confusion_matrix.png
+
+Example predictions:
+  runs/<experiment_name>/val_batch0_pred.jpg
+
+Evaluation results:
+  results/metrics.json
+  results/metrics.csv
+
+Inference outputs:
+  results/output/<image_name>_det.jpg
+
+
+================================================================================
+12. TYPICAL WORKFLOW
+================================================================================
+
+Step 1: Setup (once)
+  .\.venv\Scripts\activate
+  pip install -r requirements.txt
+
+Step 2: Convert data (once)
+  python convert_csv_to_yolo.py
+
+Step 3: Train
+  python src/train.py --data config/data.yaml --model yolov8n.pt --epochs 50 --batch 8 --device cpu --project runs --name v1
+
+Step 4: Evaluate
+  python src/eval.py --weights runs/v1/weights/best.pt --data config/data.yaml --device cpu
+
+Step 5: Test
+  python src/infer.py --weights runs/v1/weights/best.pt --source "test_image.jpg" --device cpu --save-vis results/
+
+Step 6: If results not good, train more:
+  python src/train.py --data config/data.yaml --model yolov8s.pt --epochs 100 --batch 8 --device cpu --project runs --name v2
+
+
+================================================================================
+13. TROUBLESHOOTING COMMANDS
+================================================================================
+
+# If something isn't working, try these:
+
+# Reinstall packages
+pip uninstall ultralytics torch -y
+pip install -r requirements.txt
+
+# Check if GPU is available
+python -c "import torch; print(torch.cuda.is_available())"
+
+# Check dataset paths
+python -c "import yaml; print(yaml.safe_load(open('config/data.yaml')))"
+
+# Test if model can load
+python -c "from ultralytics import YOLO; YOLO('yolov8n.pt')"
+
+# Clear cache (if getting weird errors)
+pip cache purge
+
+
+================================================================================
+14. BEFORE YOU CLOSE TERMINAL
+================================================================================
+
+Make sure training is complete (you'll see "Training complete!")
+Note which experiment name you used (e.g., exp1, v1, etc.)
+Your model is at: runs/<name>/weights/best.pt
+
+To resume work later:
+  1. Open terminal
+  2. cd "C:\Users\kazzi\Desktop\AI Model-Plasmodium Detector-Mehrad"
+  3. .\.venv\Scripts\activate
+  4. Run your commands
+
+
+================================================================================
+15. QUICK TESTS TO VERIFY EVERYTHING WORKS
+================================================================================
+
+# Test 1: Check setup
+python check_setup.py
+# Should show: ✅ for Python, packages, dataset, config
+
+# Test 2: Quick training (2 epochs just to test)
+python src/train.py --data config/data.yaml --model yolov8n.pt --epochs 2 --batch 8 --device cpu --project runs --name test
+
+# Test 3: Inference on one image
+python src/infer.py --weights runs/test/weights/best.pt --source "Dataset/images/val" --device cpu --save-vis results/test
+
+# If all work ✅ → Everything is set up correctly!
+
+
+================================================================================
+                              END OF CHEATSHEET
+================================================================================
+
+💡 TIP: Keep this file open in a text editor while working!
+
+📖 For detailed explanations, see:
+   - BEGINNER_TUTORIAL.md (complete guide)
+   - README_SIMPLE.md (quick overview)
+   - CONVERSION_GUIDE.md (data conversion details)
+
+🆘 Problems? Run: python check_setup.py
+
+Good luck! 🚀
+
+
+

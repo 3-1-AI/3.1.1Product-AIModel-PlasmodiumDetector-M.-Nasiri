@@ -1,0 +1,16 @@
+path: "C:/Users/kazzi/Desktop/AI Model-Plasmodium Detector-Mehrad/Dataset"
+
+train: images/train
+val: images/val
+test: images/test  # optional
+
+# Classes found in your CSV file (alphabetical order):
+# gam = Gametocyte, ring = Ring stage, schi = Schizont, tro = Trophozoite
+names:
+  - gam
+  - ring
+  - schi
+  - tro
+
+
+
