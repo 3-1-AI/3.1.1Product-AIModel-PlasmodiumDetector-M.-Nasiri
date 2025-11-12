@@ -37,6 +37,7 @@ class PlasmodiumDetectorGUI:
 		self.drag_start_x = 0
 		self.drag_start_y = 0
 		self.is_dragging = False
+		self.camera_index = 0  # Default camera
 		
 		# Title
 		title_frame = tk.Frame(root, bg="#34495e", height=60)
@@ -95,6 +96,55 @@ class PlasmodiumDetectorGUI:
 			**btn_style
 		)
 		self.btn_save.pack(pady=10, padx=15)
+		
+		# Camera selection
+		camera_select_frame = tk.LabelFrame(
+			left_panel,
+			text="Camera Selection",
+			font=("Arial", 11, "bold"),
+			bg="#34495e",
+			fg="white",
+			bd=2
+		)
+		camera_select_frame.pack(pady=10, padx=15, fill=tk.X)
+		
+		tk.Label(
+			camera_select_frame,
+			text="Camera Index:",
+			font=("Arial", 9),
+			bg="#34495e",
+			fg="white"
+		).pack(pady=(5, 0))
+		
+		# Camera index selector
+		camera_frame = tk.Frame(camera_select_frame, bg="#34495e")
+		camera_frame.pack(pady=5)
+		
+		self.camera_var = tk.StringVar(value="0")
+		camera_options = ["0 (Webcam)", "1 (USB 1)", "2 (USB 2)", "3 (USB 3)"]
+		
+		self.camera_dropdown = ttk.Combobox(
+			camera_frame,
+			textvariable=self.camera_var,
+			values=camera_options,
+			state="readonly",
+			width=15,
+			font=("Arial", 9)
+		)
+		self.camera_dropdown.pack(pady=5)
+		self.camera_dropdown.bind("<<ComboboxSelected>>", self.on_camera_selected)
+		
+		# Test camera button
+		tk.Button(
+			camera_select_frame,
+			text="🔍 Test Camera",
+			command=self.test_camera,
+			bg="#3498db",
+			fg="white",
+			font=("Arial", 9),
+			width=15,
+			height=1
+		).pack(pady=5)
 		
 		self.btn_camera = tk.Button(
 			left_panel, 
@@ -312,7 +362,8 @@ class PlasmodiumDetectorGUI:
 		self.cam_running = True
 		self.btn_camera.config(text="⏹️ Stop Camera", bg="#e74c3c")
 		self.btn_open.config(state=tk.DISABLED)
-		self.status_var.set("Camera running - Press 'Stop Camera' to end")
+		self.camera_dropdown.config(state=tk.DISABLED)  # Disable camera selection while running
+		self.status_var.set(f"Camera {self.camera_index} running - Press 'Stop Camera' to end")
 		self.cam_thread = threading.Thread(target=self._cam_loop, daemon=True)
 		self.cam_thread.start()
 	
@@ -320,13 +371,14 @@ class PlasmodiumDetectorGUI:
 		self.cam_running = False
 		self.btn_camera.config(text="📷 Start Camera", bg="#e67e22")
 		self.btn_open.config(state=tk.NORMAL)
+		self.camera_dropdown.config(state="readonly")  # Re-enable camera selection
 		self.status_var.set("Camera stopped")
 	
 	def _cam_loop(self):
-		cap = cv2.VideoCapture(0)
+		cap = cv2.VideoCapture(self.camera_index)
 		if not cap.isOpened():
 			self.cam_running = False
-			self.status_var.set("Error: Could not open camera")
+			self.status_var.set(f"Error: Could not open camera {self.camera_index}")
 			return
 		
 		while self.cam_running:
@@ -523,6 +575,32 @@ class PlasmodiumDetectorGUI:
 	def on_drag_end(self, event):
 		self.is_dragging = False
 		self.canvas.config(cursor="")
+	
+	def on_camera_selected(self, event):
+		"""Update camera index when selection changes"""
+		selection = self.camera_var.get()
+		# Extract number from "0 (Webcam)" format
+		self.camera_index = int(selection.split()[0])
+		self.status_var.set(f"Camera {self.camera_index} selected")
+	
+	def test_camera(self):
+		"""Test if selected camera is available"""
+		test_index = int(self.camera_var.get().split()[0])
+		self.status_var.set(f"Testing camera {test_index}...")
+		self.root.update()
+		
+		cap = cv2.VideoCapture(test_index)
+		if cap.isOpened():
+			ret, frame = cap.read()
+			cap.release()
+			if ret:
+				self.status_var.set(f"✅ Camera {test_index} is working!")
+				# Show test frame briefly
+				self.display_image(frame)
+			else:
+				self.status_var.set(f"❌ Camera {test_index} opened but no frame received")
+		else:
+			self.status_var.set(f"❌ Camera {test_index} not available")
 
 
 def main():
