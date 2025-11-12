@@ -528,7 +528,7 @@ class PlasmodiumDetectorGUI:
 def main():
 	parser = argparse.ArgumentParser(description="Advanced GUI for Plasmodium Detector")
 	parser.add_argument("--weights", type=str, required=True, help="Path to .pt weights")
-	parser.add_argument("--device", type=str, default="cuda:0")
+	parser.add_argument("--device", type=str, default="cpu")
 	parser.add_argument("--data", type=str, default="config/data.yaml")
 	args = parser.parse_args()
 	
