@@ -1,0 +1,4 @@
+falciparum
+vivax
+ovale
+malariae

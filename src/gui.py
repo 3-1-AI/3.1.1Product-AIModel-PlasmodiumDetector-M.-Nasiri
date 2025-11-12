@@ -35,7 +35,16 @@ class App:
 		conf = res.boxes.conf.cpu().numpy()
 		boxes = [(int(x1), int(y1), int(x2), int(y2)) for x1, y1, x2, y2 in xyxy]
 		out = draw_detections(img, boxes, cls.tolist(), conf.tolist(), self.class_names)
-		cv2.imshow("Detections", out)
+		
+		# Resize for display if too large
+		display_img = out.copy()
+		max_display_size = 1200
+		h, w = display_img.shape[:2]
+		if max(h, w) > max_display_size:
+			scale = max_display_size / max(h, w)
+			display_img = cv2.resize(display_img, None, fx=scale, fy=scale)
+		
+		cv2.imshow("Detections", display_img)
 		cv2.waitKey(1)
 
 	def start_camera(self):
@@ -73,7 +82,7 @@ class App:
 def main():
 	parser = argparse.ArgumentParser(description="Minimal GUI for Plasmodium Detector")
 	parser.add_argument("--weights", type=str, required=True, help="Path to .pt weights")
-	parser.add_argument("--device", type=str, default="<<GPU_DEVICE>>")
+	parser.add_argument("--device", type=str, default="cuda:0")
 	parser.add_argument("--data", type=str, default="config/data.yaml")
 	args = parser.parse_args()
 
@@ -86,6 +95,7 @@ def main():
 
 if __name__ == "__main__":
 	main()
+
 
 
 

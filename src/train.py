@@ -11,8 +11,8 @@ def main():
 	parser.add_argument("--epochs", type=int, default=100)
 	parser.add_argument("--batch", type=int, default=16)
 	parser.add_argument("--imgsz", type=int, default=640)
-	parser.add_argument("--device", type=str, default="<<GPU_DEVICE>>", help="cuda:0 or cpu")
-	parser.add_argument("--project", type=str, default="<<OUTPUT_DIR>>/runs")
+	parser.add_argument("--device", type=str, default="cuda:0", help="cuda:0 or cpu")
+	parser.add_argument("--project", type=str, default="runs")
 	parser.add_argument("--name", type=str, default="plasmodium_yolov8")
 	parser.add_argument("--seed", type=int, default=42)
 	parser.add_argument("--hyp", type=str, default="config/hyp.yaml")
@@ -33,7 +33,6 @@ def main():
 		device=args.device,
 		project=args.project,
 		name=args.name,
-		hyp=args.hyp,
 		patience=50,
 		cache=True,
 		val=True,

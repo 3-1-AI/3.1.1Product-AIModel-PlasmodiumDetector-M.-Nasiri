@@ -1,0 +1,12 @@
+path: "C:/Users/kazzi/03University/3.1‍AI/3.1.1Product/3.1.1Product-AIModel-PlasmodiumDetector-M.-Nasiri/Dataset_DatasetNinja"
+
+train: images/train
+val: images/val
+
+# Plasmodium species classes
+names:
+  - falciparum
+  - vivax
+  - ovale
+  - malariae
+

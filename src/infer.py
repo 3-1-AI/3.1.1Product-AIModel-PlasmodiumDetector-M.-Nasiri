@@ -31,10 +31,19 @@ def run_on_source(model: YOLO, source: str, device: str, save_vis: Optional[str]
 		image = cv2.imread(str(img_path))
 		boxes = [(int(x1), int(y1), int(x2), int(y2)) for x1, y1, x2, y2 in xyxy]
 		out = draw_detections(image, boxes, cls.tolist(), conf.tolist(), class_names)
-		cv2.imshow("Detections", out)
-		cv2.waitKey(1)
+		
+		# Resize for display if too large
+		display_img = out.copy()
+		max_display_size = 1200
+		h, w = display_img.shape[:2]
+		if max(h, w) > max_display_size:
+			scale = max_display_size / max(h, w)
+			display_img = cv2.resize(display_img, None, fx=scale, fy=scale)
+		
+		cv2.imshow("Detections", display_img)
 		if save_dir:
 			cv2.imwrite(str(save_dir / f"{img_path.stem}_det.jpg"), out)
+		cv2.waitKey(0)  # Wait indefinitely until key press
 	cv2.destroyAllWindows()
 
 
@@ -66,7 +75,7 @@ def main():
 	parser.add_argument("--onnx", type=str, default=None, help="Optional ONNX path for onnxruntime inference (not required; .pt preferred)")
 	parser.add_argument("--source", type=str, help="Image file or folder")
 	parser.add_argument("--webcam", type=int, default=None, help="Webcam index")
-	parser.add_argument("--device", type=str, default="<<GPU_DEVICE>>")
+	parser.add_argument("--device", type=str, default="cuda:0")
 	parser.add_argument("--data", type=str, default="config/data.yaml", help="To fetch class names")
 	parser.add_argument("--save-vis", type=str, default=None, help="Folder to save visualizations")
 	args = parser.parse_args()

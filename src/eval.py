@@ -11,9 +11,9 @@ def main():
 	parser.add_argument("--weights", type=str, required=True, help="Path to best.pt")
 	parser.add_argument("--data", type=str, required=True, help="Path to data.yaml")
 	parser.add_argument("--imgsz", type=int, default=640)
-	parser.add_argument("--device", type=str, default="<<GPU_DEVICE>>")
-	parser.add_argument("--save-json", type=str, default="<<OUTPUT_DIR>>/eval/metrics.json")
-	parser.add_argument("--save-csv", type=str, default="<<OUTPUT_DIR>>/eval/metrics.csv")
+	parser.add_argument("--device", type=str, default="cuda:0")
+	parser.add_argument("--save-json", type=str, default="eval/metrics.json")
+	parser.add_argument("--save-csv", type=str, default="eval/metrics.csv")
 	args = parser.parse_args()
 
 	model = YOLO(args.weights)
